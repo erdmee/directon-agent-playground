@@ -17,7 +17,7 @@ _clients: dict[tuple, AsyncOpenAI] = {}
 def client_for(prefix: str = "LLM") -> tuple[AsyncOpenAI, dict]:
     s = llm_settings(prefix)
     if not s["api_key"]:
-        hint = "OPENAI_API_KEY or LLM_API_KEY" if prefix == "LLM" else f"{prefix}_API_KEY"
+        hint = "BAZE_API_KEY, OPENAI_API_KEY or LLM_API_KEY" if prefix == "LLM" else f"{prefix}_API_KEY"
         raise RuntimeError(f"{hint} is not set in .env (see env.example)")
     k = (s["api_key"], s["base_url"])
     if k not in _clients:

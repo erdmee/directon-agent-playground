@@ -11,11 +11,12 @@ import wave
 from collections.abc import AsyncIterator
 from pathlib import Path
 
+import httpx
 import numpy as np
 import websockets
 from scipy.signal import resample_poly
 
-from .config import env, soniox_settings
+from .config import BAZE_GATEWAY, env, soniox_settings
 from .model_params import GeminiTTSParams, SonioxContext, SonioxRealtimeParams
 
 RATE = 16000
@@ -69,11 +70,19 @@ def tts_params() -> GeminiTTSParams:
 async def gemini_tts(
     text: str, voice: str | None = None, style: str = "", params: GeminiTTSParams | None = None
 ) -> bytes:
-    """Whole-utterance Gemini TTS via the Interactions API, returned as 16 kHz mono s16le."""
+    """
+    Whole-utterance Gemini TTS, returned as 16 kHz mono s16le.
+
+    With BAZE_API_KEY set it goes through the BAZE speech endpoint, otherwise straight to the
+    Gemini Interactions API with GEMINI_API_KEY.
+    """
+    p = params or tts_params()
+    if env("BAZE_API_KEY"):
+        return await baze_tts(text, voice or p.voice, style, p)
     from google import genai
 
     client = genai.Client(api_key=env("GEMINI_API_KEY"), http_options={"api_version": "v1beta"})
-    it = await client.aio.interactions.create(**(params or tts_params()).to_kwargs(text, style, voice))
+    it = await client.aio.interactions.create(**p.to_kwargs(text, style, voice))
     audio = getattr(it, "output_audio", None)
     if audio is None or not audio.data:
         raise RuntimeError(f"no audio in TTS response for {text[:30]!r}")
@@ -85,6 +94,26 @@ async def gemini_tts(
     return resample(data, int(m.group(1)) if m else 24000, RATE)
 
 
+async def baze_tts(text: str, voice: str, style: str, p: GeminiTTSParams) -> bytes:
+    """
+    Gemini TTS through BAZE `POST /audio/speech/`, which returns raw 24 kHz s16le PCM.
+
+    `instructions` is honoured only by gemini-3.8-flash-tts, so other models get the style as a text prefix.
+    """
+    body: dict = {"model": p.model, "input": text, "voice": voice}
+    if style and p.supports_annotations:
+        body["instructions"] = style
+    elif style:
+        body["input"] = f"{style}: {text}"
+    async with httpx.AsyncClient(timeout=60) as h:
+        r = await h.post(
+            f"{BAZE_GATEWAY}/audio/speech/", headers={"Authorization": f"Bearer {env('BAZE_API_KEY')}"}, json=body
+        )
+    if r.status_code != 200:
+        raise RuntimeError(f"BAZE TTS {r.status_code}: {r.text[:200]}")
+    return resample(r.content[: len(r.content) // 2 * 2], 24000, RATE)
+
+
 async def gemini_tts_stream(
     text: str, voice: str | None = None, style: str = "", params: GeminiTTSParams | None = None
 ) -> AsyncIterator[bytes]:
@@ -92,8 +121,12 @@ async def gemini_tts_stream(
     Streaming Gemini TTS: yields 16 kHz s16le chunks as they arrive.
 
     The stream's default format is headerless 24 kHz L16; 2.5 Flash TTS rejects an explicit
-    audio/l16 mime_type, so the format is left unset.
+    audio/l16 mime_type, so the format is left unset. BAZE documents no streaming TTS, so with
+    BAZE_API_KEY the whole utterance arrives as one chunk.
     """
+    if env("BAZE_API_KEY"):
+        yield await gemini_tts(text, voice, style, params)
+        return
     from google import genai
 
     client = genai.Client(api_key=env("GEMINI_API_KEY"), http_options={"api_version": "v1beta"})

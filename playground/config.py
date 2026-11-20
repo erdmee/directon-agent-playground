@@ -15,6 +15,8 @@ RUNS = ROOT / "runs" / "playground"
 
 KEY_NAMES = ("SONIOX_API_KEY", "BAZE_API_KEY", "GEMINI_API_KEY", "LLM_API_KEY", "OPENAI_API_KEY", "DECISION_API_KEY")
 SONIOX_DIRECT_URL = "wss://stt-rt.soniox.com/transcribe-websocket"
+# BAZE gateway (docs.factchat.kr): one key for Soniox STT, OpenAI-compatible chat and Gemini TTS.
+BAZE_GATEWAY = "https://api.baze.co/v1/gateway"
 BAZE_SONIOX_URL = "wss://api.baze.co/v1/gateway/soniox/transcribe-websocket"
 
 
@@ -61,17 +63,24 @@ def llm_settings(prefix: str = "LLM") -> dict:
     """
     Settings for an OpenAI-compatible endpoint.
 
-    LLM_* falls back to OPENAI_API_KEY; any other prefix (e.g. DECISION) with no key of its own
-    falls back to the LLM_* settings, so decision strategies run before a separate model is set up.
+    LLM_* uses, in order: LLM_API_KEY, then BAZE_API_KEY (BAZE gateway as base URL), then
+    OPENAI_API_KEY. Any other prefix (e.g. DECISION) with no key of its own falls back to the
+    LLM_* settings, so decision strategies run before a separate model is set up.
     """
     if prefix != "LLM" and not env(f"{prefix}_API_KEY"):
         return llm_settings("LLM")
-    key = env(f"{prefix}_API_KEY") or (env("OPENAI_API_KEY") if prefix == "LLM" else "")
+    key, base_url, via = env(f"{prefix}_API_KEY"), env(f"{prefix}_BASE_URL") or None, prefix.lower()
+    if prefix == "LLM" and not key:
+        if env("BAZE_API_KEY"):
+            key, base_url, via = env("BAZE_API_KEY"), base_url or BAZE_GATEWAY, "baze"
+        else:
+            key, via = env("OPENAI_API_KEY"), "openai"
     # "off" omits reasoning_effort; other providers (e.g. Mercury) default to off.
     effort = env(f"{prefix}_REASONING_EFFORT", "none" if prefix == "LLM" else "off")
     return {
+        "via": via,
         "api_key": key,
-        "base_url": env(f"{prefix}_BASE_URL") or None,
+        "base_url": base_url,
         "model": env(f"{prefix}_MODEL", "gpt-5.4-mini" if prefix == "LLM" else ""),
         "reasoning_effort": None if effort == "off" else effort,
     }

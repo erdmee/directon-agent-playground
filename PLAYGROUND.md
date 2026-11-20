@@ -6,7 +6,7 @@ The rest of this folder is the original starter kit (commit `02cb796`), unchange
 ## Setup
 
 ```bash
-cp env.example .env   # fill BAZE_API_KEY (or SONIOX_API_KEY), GEMINI_API_KEY, OPENAI_API_KEY (+ DECISION_* later)
+cp env.example .env   # fill BAZE_API_KEY alone, or SONIOX_/GEMINI_/OPENAI_API_KEY (+ DECISION_* later)
 uv sync
 uv run python -m playground.check   # shows which keys are set and which STT route is used
 uv run pytest -q      # offline checks, no keys needed

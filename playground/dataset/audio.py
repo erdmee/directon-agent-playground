@@ -125,8 +125,8 @@ def main() -> None:
     rows = load_scenarios(a.inp)
     todo = [r for r in rows if not a.only or r["id"] in a.only.split(",")]
     if a.cmd == "synth":
-        if not env("GEMINI_API_KEY"):
-            raise SystemExit("GEMINI_API_KEY is not set in .env")
+        if not (env("BAZE_API_KEY") or env("GEMINI_API_KEY")):
+            raise SystemExit("Set BAZE_API_KEY or GEMINI_API_KEY in .env")
         asyncio.run(synth(todo, a.audio_dir, a.voice or env("GEMINI_CALLER_VOICE", "Puck"), a.phone, a.force))
         out = a.out or a.inp.with_name(a.inp.stem + "_audio.jsonl")
     else:
