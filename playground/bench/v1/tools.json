@@ -1,0 +1,96 @@
+[
+  {
+    "name": "verify_customer",
+    "description": "Verify the caller's identity with the orderer's name and mobile phone number. Required before any order lookup, cancellation or return.",
+    "parameters": {
+      "type": "object",
+      "required": ["name", "phone"],
+      "properties": {
+        "name": {"type": "string", "description": "Orderer name, e.g. 김민지"},
+        "phone": {"type": "string", "description": "Mobile number as digits only, e.g. 01012345678"}
+      }
+    }
+  },
+  {
+    "name": "list_orders",
+    "description": "List recent orders of a verified customer.",
+    "parameters": {
+      "type": "object",
+      "required": ["customer_id"],
+      "properties": {
+        "customer_id": {"type": "string", "description": "customer_id returned by verify_customer"}
+      }
+    }
+  },
+  {
+    "name": "get_order",
+    "description": "Get order details: status, items, shipping carrier and tracking number, delivery date.",
+    "parameters": {
+      "type": "object",
+      "required": ["order_id"],
+      "properties": {
+        "order_id": {"type": "string", "description": "Order ID such as A1001"}
+      }
+    }
+  },
+  {
+    "name": "cancel_order",
+    "description": "Cancel an order. Only for status 결제완료 or 상품준비중, and only after the caller explicitly agreed.",
+    "parameters": {
+      "type": "object",
+      "required": ["order_id", "reason"],
+      "properties": {
+        "order_id": {"type": "string"},
+        "reason": {"type": "string", "description": "Short reason given by the caller"}
+      }
+    }
+  },
+  {
+    "name": "request_return",
+    "description": "Register a return. Only within 7 days after delivery, unopened items, after the caller agreed.",
+    "parameters": {
+      "type": "object",
+      "required": ["order_id", "reason", "opened"],
+      "properties": {
+        "order_id": {"type": "string"},
+        "reason": {"type": "string", "enum": ["단순변심", "상품불량", "오배송"]},
+        "opened": {"type": "boolean", "description": "Whether the package was opened"}
+      }
+    }
+  },
+  {
+    "name": "get_product_info",
+    "description": "Get product facts: ingredients, how to take it, price, stock.",
+    "parameters": {
+      "type": "object",
+      "required": ["product_name"],
+      "properties": {
+        "product_name": {"type": "string", "description": "Product name, e.g. 오메가3"}
+      }
+    }
+  },
+  {
+    "name": "transfer_to_agent",
+    "description": "Hand the call over to a human agent.",
+    "parameters": {
+      "type": "object",
+      "required": ["reason", "summary"],
+      "properties": {
+        "reason": {"type": "string", "enum": ["고객요청", "부작용신고", "강한불만", "처리불가", "본인확인실패"]},
+        "summary": {"type": "string", "description": "One-sentence summary of the call so far"}
+      }
+    }
+  },
+  {
+    "name": "request_callback",
+    "description": "Register a callback request.",
+    "parameters": {
+      "type": "object",
+      "required": ["phone", "preferred_time"],
+      "properties": {
+        "phone": {"type": "string", "description": "Digits only"},
+        "preferred_time": {"type": "string", "description": "Preferred time as the caller said it, e.g. 내일 오전"}
+      }
+    }
+  }
+]

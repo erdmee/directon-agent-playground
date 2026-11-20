@@ -1,0 +1,44 @@
+{
+  "customers": [
+    {"customer_id": "C001", "name": "김민지", "phone": "01012345678"},
+    {"customer_id": "C002", "name": "이준호", "phone": "01022223333"},
+    {"customer_id": "C003", "name": "박서연", "phone": "01098765432"}
+  ],
+  "orders": [
+    {"order_id": "A1001", "customer_id": "C001", "status": "배송중", "ordered_at": "2026-11-17",
+     "shipped_at": "2026-11-19", "delivered_at": null, "carrier": "CJ대한통운", "tracking_no": "640012345678",
+     "items": [{"product": "비타민C 1000", "qty": 2}], "total": 31800},
+    {"order_id": "A1002", "customer_id": "C001", "status": "결제완료", "ordered_at": "2026-11-20",
+     "shipped_at": null, "delivered_at": null, "carrier": null, "tracking_no": null,
+     "items": [{"product": "오메가3 알티지", "qty": 1}], "total": 29900},
+    {"order_id": "A1003", "customer_id": "C002", "status": "배송완료", "ordered_at": "2026-11-14",
+     "shipped_at": "2026-11-15", "delivered_at": "2026-11-17", "carrier": "한진택배", "tracking_no": "512300045678",
+     "items": [{"product": "프로바이오틱스 유산균", "qty": 1}], "total": 24500},
+    {"order_id": "A1004", "customer_id": "C002", "status": "배송완료", "ordered_at": "2026-11-01",
+     "shipped_at": "2026-11-03", "delivered_at": "2026-11-05", "carrier": "한진택배", "tracking_no": "512300011223",
+     "items": [{"product": "6년근 홍삼정", "qty": 1}], "total": 89000},
+    {"order_id": "A1005", "customer_id": "C003", "status": "상품준비중", "ordered_at": "2026-11-20",
+     "shipped_at": null, "delivered_at": null, "carrier": null, "tracking_no": null,
+     "items": [{"product": "루테인 지아잔틴", "qty": 1}], "total": 19800},
+    {"order_id": "A1006", "customer_id": "C003", "status": "배송중", "ordered_at": "2026-11-18",
+     "shipped_at": "2026-11-20", "delivered_at": null, "carrier": "롯데택배", "tracking_no": "309988776655",
+     "items": [{"product": "저분자 콜라겐", "qty": 3}], "total": 59700},
+    {"order_id": "A1007", "customer_id": "C003", "status": "배송완료", "ordered_at": "2026-11-12",
+     "shipped_at": "2026-11-13", "delivered_at": "2026-11-15", "carrier": "롯데택배", "tracking_no": "309911112222",
+     "items": [{"product": "오메가3 알티지", "qty": 2}], "total": 59800}
+  ],
+  "products": [
+    {"name": "비타민C 1000", "aliases": ["비타민c", "비타민씨", "비타민"], "price": 15900, "stock": "재고 있음",
+     "ingredients": "비타민C 1000mg", "intake": "하루 1회 1정, 식후 물과 함께"},
+    {"name": "오메가3 알티지", "aliases": ["오메가3", "오메가쓰리", "오메가"], "price": 29900, "stock": "재고 있음",
+     "ingredients": "rTG 오메가3(EPA+DHA) 600mg", "intake": "하루 1회 2캡슐, 식사 직후"},
+    {"name": "프로바이오틱스 유산균", "aliases": ["유산균", "프로바이오틱스"], "price": 24500, "stock": "재고 있음",
+     "ingredients": "유산균 100억 CFU, 프락토올리고당", "intake": "하루 1회 1포, 아침 공복"},
+    {"name": "6년근 홍삼정", "aliases": ["홍삼", "홍삼정"], "price": 89000, "stock": "품절, 12월 1일 입고 예정",
+     "ingredients": "6년근 홍삼농축액 100%, 진세노사이드 Rg1+Rb1+Rg3 7mg", "intake": "하루 1회 1스푼, 따뜻한 물에 타서"},
+    {"name": "루테인 지아잔틴", "aliases": ["루테인", "지아잔틴"], "price": 19800, "stock": "재고 있음",
+     "ingredients": "루테인 20mg, 지아잔틴 4mg", "intake": "하루 1회 1캡슐"},
+    {"name": "저분자 콜라겐", "aliases": ["콜라겐"], "price": 19900, "stock": "재고 있음",
+     "ingredients": "저분자 피쉬콜라겐 펩타이드 1000mg", "intake": "하루 1포, 물 없이 섭취"}
+  ]
+}

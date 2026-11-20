@@ -1,0 +1,41 @@
+[project]
+name = "directon-playground"
+version = "0.1.0"
+description = "Offline playground for comparing tool-calling strategies of a Korean CS voice agent"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=2",
+    "google-genai>=1.0",
+    "websockets>=14",
+    "httpx",
+    "numpy",
+    "scipy",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pyrefly",
+    "pytest>=9.2.0",
+    "scipy-stubs>=1.17.1.5",
+]
+# Only needed for dataset/import_hf.py.
+hf = ["datasets"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["eval", "example_server", "mock_tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "D213"]
+ignore = ["E501"]
+
+[tool.pyrefly]
+project-includes = ["playground"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

@@ -1,0 +1,16 @@
+[
+  {"name": "plain", "strategy": "llm_tools", "options": {"prompt": "manual"},
+   "note": "Plain LLM: manual in the prompt, all tools, the model decides everything"},
+  {"name": "plain+guard", "strategy": "llm_tools", "guard": true, "options": {"prompt": "manual"},
+   "note": "Plain LLM, rule-violating tool calls blocked and returned as errors"},
+  {"name": "tree", "strategy": "llm_tools", "options": {"prompt": "tree"},
+   "note": "Decision-tree reasoning written into the prompt"},
+  {"name": "router", "strategy": "router", "options": {"prompt": "manual"},
+   "note": "Intent router picks tool subset and procedure, then LLM tool calling"},
+  {"name": "decision-actions", "strategy": "decision_actions", "options": {},
+   "note": "Decision model picks one next action as JSON inside a frame; frame checks verification and consent"},
+  {"name": "decision-rules", "strategy": "decision_rules", "options": {},
+   "note": "Decision model (LLM JSON) only extracts intent and slots; code runs the manual and every tool call"},
+  {"name": "decision-rules-mercury", "strategy": "decision_rules", "options": {"nlu": "mercury"},
+   "note": "Same rules engine, NLU by Inception mercury-decide (/v1/decisions); needs DECISION_API_KEY"}
+]
