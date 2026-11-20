@@ -120,9 +120,23 @@ async def agent_turn_streaming(agent, heard: str, voice: str, t_zero: float) -> 
     return reply, trace, playout, pieces
 
 
-async def run_call(sc: dict, variant: dict, voice: str, mode: str) -> tuple[bytes, list[dict]]:
-    tools = ToolRunner(sc.get("now") or now_default(), guard=variant.get("guard", False))
-    agent = REGISTRY[variant["strategy"]](Session(now=tools.backend.now, tools=tools), **variant.get("options", {}))
+async def run_call(
+    sc: dict,
+    variant: dict,
+    voice: str,
+    mode: str,
+    tools: ToolRunner | None = None,
+    session_extra: dict | None = None,
+) -> tuple[bytes, list[dict]]:
+    """
+    Play one scenario end to end and return the call audio and a per-turn timeline.
+
+    `tools` and `session_extra` (caller, manual, tool_schemas) swap in another domain, such as the
+    starter kit's demo tools.
+    """
+    tools = tools or ToolRunner(sc.get("now") or now_default(), guard=variant.get("guard", False))
+    session = Session(now=sc.get("now") or tools.backend.now, tools=tools, **(session_extra or {}))
+    agent = REGISTRY[variant["strategy"]](session, **variant.get("options", {}))
     timeline: list[dict] = [{"speaker": "agent", "text": GREETING}]
     audio = [silence(0.3), trim_silence(await gemini_tts(GREETING, voice, AGENT_STYLE)), silence(0.6)]
 
