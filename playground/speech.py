@@ -15,7 +15,7 @@ import numpy as np
 import websockets
 from scipy.signal import resample_poly
 
-from .config import env
+from .config import env, soniox_settings
 from .model_params import GeminiTTSParams, SonioxContext, SonioxRealtimeParams
 
 RATE = 16000
@@ -123,15 +123,15 @@ async def gemini_tts_stream(
 
 async def soniox_transcribe(pcm: bytes, terms: list[str] | None = None, speed: float = 4.0) -> str:
     """Stream a 16 kHz file through the same real-time model the live agent uses."""
-    url = env("SONIOX_URL", "wss://stt-rt.soniox.com/transcribe-websocket")
+    s = soniox_settings()
     params = SonioxRealtimeParams(
-        model=env("SONIOX_MODEL", "stt-rt-v6"),
+        model=s["model"],
         sample_rate=RATE,
         context=SonioxContext(terms=terms) if terms else None,
     )
     final: list[str] = []
-    headers = {"Authorization": f"Bearer {env('SONIOX_API_KEY')}"}
-    async with websockets.connect(url, max_size=None, additional_headers=headers) as ws:
+    headers = {"Authorization": f"Bearer {s['key']}"}
+    async with websockets.connect(s["url"], max_size=None, additional_headers=headers) as ws:
         await ws.send(json.dumps(params.to_message()))
 
         async def sender():

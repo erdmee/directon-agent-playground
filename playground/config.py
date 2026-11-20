@@ -13,7 +13,9 @@ DOMAIN = PG / "domain"
 DATA = PG / "data"
 RUNS = ROOT / "runs" / "playground"
 
-KEY_NAMES = ("SONIOX_API_KEY", "GEMINI_API_KEY", "LLM_API_KEY", "OPENAI_API_KEY", "DECISION_API_KEY")
+KEY_NAMES = ("SONIOX_API_KEY", "BAZE_API_KEY", "GEMINI_API_KEY", "LLM_API_KEY", "OPENAI_API_KEY", "DECISION_API_KEY")
+SONIOX_DIRECT_URL = "wss://stt-rt.soniox.com/transcribe-websocket"
+BAZE_SONIOX_URL = "wss://api.baze.co/v1/gateway/soniox/transcribe-websocket"
 
 
 def load_dotenv(path: Path = ROOT / ".env") -> None:
@@ -35,6 +37,24 @@ def env(name: str, default: str = "") -> str:
 def key_status() -> dict[str, bool]:
     """Which keys are set, without exposing any value."""
     return {k: bool(env(k)) for k in KEY_NAMES}
+
+
+def soniox_settings() -> dict[str, str]:
+    """
+    Endpoint, key and model for Soniox real-time STT.
+
+    A BAZE_API_KEY routes Soniox through the BAZE gateway and takes precedence over
+    SONIOX_URL / SONIOX_API_KEY; without it the direct Soniox endpoint is used.
+    """
+    model = env("SONIOX_MODEL", "stt-rt-v6")
+    if env("BAZE_API_KEY"):
+        return {
+            "via": "baze",
+            "url": env("BAZE_SONIOX_URL", BAZE_SONIOX_URL),
+            "key": env("BAZE_API_KEY"),
+            "model": model,
+        }
+    return {"via": "soniox", "url": env("SONIOX_URL", SONIOX_DIRECT_URL), "key": env("SONIOX_API_KEY"), "model": model}
 
 
 def llm_settings(prefix: str = "LLM") -> dict:

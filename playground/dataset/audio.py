@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 from scipy.signal import butter, sosfilt
 
-from ..config import DATA, ROOT, env, load_dotenv, load_scenarios
+from ..config import DATA, ROOT, env, load_dotenv, load_scenarios, soniox_settings
 from ..speech import RATE, gemini_tts, read_wav16k, resample, soniox_transcribe, trim_silence, write_wav16k
 
 LEAD_S, TAIL_S, TURN_GAP_S = 0.4, 0.8, 1.5
@@ -130,8 +130,8 @@ def main() -> None:
         asyncio.run(synth(todo, a.audio_dir, a.voice or env("GEMINI_CALLER_VOICE", "Puck"), a.phone, a.force))
         out = a.out or a.inp.with_name(a.inp.stem + "_audio.jsonl")
     else:
-        if not env("SONIOX_API_KEY"):
-            raise SystemExit("SONIOX_API_KEY is not set in .env")
+        if not soniox_settings()["key"]:
+            raise SystemExit("Set BAZE_API_KEY or SONIOX_API_KEY in .env")
         asyncio.run(transcribe(todo, a.force))
         out = a.out or a.inp
     out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
